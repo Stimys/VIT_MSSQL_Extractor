@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="115.0" prefWidth="376.0" style="-fx-background-color: #191970;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.ReportWindowController">
+   <children>
+      <AnchorPane layoutX="8.0" layoutY="6.0" prefHeight="102.0" prefWidth="361.0" style="-fx-background-color: #4682B4;">
+         <opaqueInsets>
+            <Insets right="1.0" />
+         </opaqueInsets>
+         <children>
+            <Label layoutX="14.0" layoutY="5.0" text="AOI report file has been saved into the 'Files' folder." textFill="WHITE">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="14.0" layoutY="24.0" text="Do you want to open it?" textFill="WHITE">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnYes" layoutX="21.0" layoutY="54.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="45.0" text="Yes" />
+            <Button fx:id="btnNo" layoutX="76.0" layoutY="54.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="45.0" text="No" />
+            <Button fx:id="btnShowFolder" layoutX="135.0" layoutY="54.0" mnemonicParsing="false" text="Show folder" />
+         </children>
+      </AnchorPane>
+   </children>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+</AnchorPane>

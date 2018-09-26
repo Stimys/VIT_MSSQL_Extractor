@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="303.0" prefWidth="341.0" style="-fx-background-color: #191970;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.GetImageController">
+   <children>
+      <AnchorPane layoutX="12.0" layoutY="14.0" prefHeight="71.0" prefWidth="317.0" style="-fx-background-color: #4682B4;">
+         <children>
+            <DatePicker fx:id="tpImageStartDate" layoutX="129.0" layoutY="36.0" />
+            <Label layoutX="8.0" layoutY="6.0" text="Start Date and Time" textFill="WHITE" underline="true">
+               <font>
+                  <Font size="13.0" />
+               </font></Label>
+            <ComboBox fx:id="cbImageStartTime" layoutX="51.0" layoutY="36.0" prefHeight="25.0" prefWidth="60.0" />
+            <Label layoutX="14.0" layoutY="40.0" text="Hour:" textFill="WHITE" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="12.0" layoutY="97.0" prefHeight="71.0" prefWidth="317.0" style="-fx-background-color: #4682B4;">
+         <children>
+            <DatePicker fx:id="tpImageEndDate" layoutX="129.0" layoutY="36.0" />
+            <Label layoutX="8.0" layoutY="6.0" text="End Date and Time" textFill="WHITE" underline="true">
+               <font>
+                  <Font size="13.0" />
+               </font></Label>
+            <ComboBox fx:id="cbImageEndTime" layoutX="51.0" layoutY="36.0" prefHeight="25.0" prefWidth="60.0" />
+            <Label layoutX="14.0" layoutY="40.0" text="Hour:" textFill="WHITE" />
+         </children>
+      </AnchorPane>
+      <Button fx:id="btnClose" layoutX="284.0" layoutY="264.0" mnemonicParsing="false" text="Close" />
+      <Button fx:id="btnDownload" layoutX="194.0" layoutY="264.0" mnemonicParsing="false" text="Download" />
+      <ComboBox fx:id="cbMachineName" layoutX="85.0" layoutY="180.0" prefHeight="25.0" prefWidth="109.0" />
+      <Label layoutX="14.0" layoutY="184.0" text="Machine:" textFill="WHITE" />
+      <Label fx:id="lbStatus" layoutX="19.0" layoutY="268.0" text="Status" textFill="WHITE">
+         <font>
+            <Font name="SAPDings Normal" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="14.0" layoutY="221.0" text="Defect type:" textFill="WHITE" />
+      <ComboBox fx:id="cbDefectType" layoutX="85.0" layoutY="217.0" prefHeight="25.0" prefWidth="109.0" />
+      <Label fx:id="lbSelectedMachineIP" layoutX="207.0" layoutY="184.0" text="IP:" textFill="WHITE" />
+      <TextField fx:id="tfIP" layoutX="220.0" layoutY="180.0" prefHeight="25.0" prefWidth="109.0" />
+      <Button fx:id="btnSetIP" layoutX="140.0" layoutY="264.0" mnemonicParsing="false" text="Set IP" />
+   </children>
+</AnchorPane>

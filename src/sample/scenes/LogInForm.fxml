@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.effect.Blend?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="172.0" prefWidth="344.0" style="-fx-background-color: #191970;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.LogInController">
+   <children>
+      <AnchorPane layoutX="14.0" layoutY="14.0" prefHeight="34.0" prefWidth="317.0" style="-fx-background-color: #4682B4;">
+         <children>
+            <Label layoutX="50.0" layoutY="6.0" text="VIT MSSQL Extractor" textFill="MIDNIGHTBLUE">
+               <font>
+                  <Font size="24.0" />
+               </font>
+               <effect>
+                  <Blend />
+               </effect>
+            </Label>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="14.0" layoutY="66.0" prefHeight="90.0" prefWidth="317.0" style="-fx-background-color: #4682B4;">
+         <children>
+            <PasswordField fx:id="tfPassword" layoutX="84.0" layoutY="14.0" promptText="Enter Password" />
+            <Button fx:id="btnLogIn" layoutX="110.0" layoutY="52.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="Log In" />
+            <Button fx:id="btnInfo" layoutX="175.0" layoutY="52.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="Info" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

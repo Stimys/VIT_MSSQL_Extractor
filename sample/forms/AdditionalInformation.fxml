@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="378.0" prefWidth="357.0" style="-fx-background-color: #191970;" xmlns="http://javafx.com/javafx/8.0.151" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.AddInformationController">
+   <children>
+      <AnchorPane layoutX="12.0" layoutY="12.0" prefHeight="359.0" prefWidth="338.0" style="-fx-background-color: #4682B4;">
+         <children>
+            <Label layoutX="8.0" layoutY="164.0" text="TOP 5 FALSE ALARMS:" textFill="WHITE" underline="true">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="27.0" layoutY="59.0" text="Defect Rate(%):" textFill="WHITE" />
+            <Label layoutX="27.0" layoutY="34.0" text="Tested Components:" textFill="WHITE" />
+            <Label fx:id="lbTestedComponents" layoutX="143.0" layoutY="34.0" text="--" textFill="WHITE" />
+            <Label fx:id="lbErrorRate" layoutX="116.0" layoutY="59.0" text="--" textFill="WHITE" />
+            <Label layoutX="27.0" layoutY="83.0" text="False Alarm Rate(%):" textFill="WHITE" />
+            <Label fx:id="lbFalseAlarmRate" layoutX="141.0" layoutY="82.0" text="--" textFill="WHITE" />
+            <Label layoutX="27.0" layoutY="107.0" text="Actual defects Rate(%):" textFill="WHITE" />
+            <Label fx:id="lbActualDefectsRate" layoutX="152.0" layoutY="107.0" text="--" textFill="WHITE" />
+            <Label layoutX="6.0" text="Additional Information" textFill="WHITE" underline="true">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="112.0" fitWidth="108.0" layoutX="216.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assests/fox_alpha_layer.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="27.0" layoutY="130.0" text="Quality of inspection(%)" textFill="WHITE" />
+            <Label fx:id="lbQualityOfInspection" layoutX="164.0" layoutY="130.0" text="--" textFill="WHITE" />
+            <Label layoutX="9.0" layoutY="147.0" text="------------------------------" textFill="WHITE" />
+            <Label fx:id="lbTopOne" layoutX="27.0" layoutY="192.0" text="1)" textFill="WHITE" />
+            <Label fx:id="lbTopTwo" layoutX="27.0" layoutY="209.0" text="2)" textFill="WHITE" />
+            <Label fx:id="lbTopThree" layoutX="27.0" layoutY="226.0" text="3)" textFill="WHITE" />
+            <Label fx:id="lbTopFour" layoutX="27.0" layoutY="243.0" text="4)" textFill="WHITE" />
+            <Label fx:id="lbTopFive" layoutX="27.0" layoutY="260.0" text="5)" textFill="WHITE" />
+         </children>
+         <opaqueInsets>
+            <Insets right="1.0" />
+         </opaqueInsets>
+      </AnchorPane>
+   </children>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+</AnchorPane>
