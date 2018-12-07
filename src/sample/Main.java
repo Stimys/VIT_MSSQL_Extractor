@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    public final static String VERSION = "4.1.0";
+    public final static String VERSION = "4.1.1";
     public final static String LAST_VERSION_DATE = "07.12.2018";
     public static Stage primaryStage;
 

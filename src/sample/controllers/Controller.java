@@ -186,9 +186,8 @@ public class Controller {
 
         lbVersion.setText("v."+Main.VERSION);
         errorInformationPanel.setVisible(false);
-        btnExport.setDisable(true);
+        //btnExport.setDisable(true);
 
-        //linesList = new LinesIni().initialization();
         lineObjList = new LineXMLIni().parse();
         /**
          * Adding values to the combo boxes
@@ -605,7 +604,6 @@ public class Controller {
                 else{
                     erroralert.setTitle("An Error Occurred!");
                     erroralert.setHeaderText("File C:/VIT/VITImageManager.exe is not found!");
-                    erroralert.setContentText(null);
                     erroralert.showAndWait();
                 }
 
@@ -629,7 +627,7 @@ public class Controller {
             } else{
                 erroralert.setTitle("An Error Occurred!");
                 erroralert.setHeaderText("No data to export!");
-                erroralert.setContentText(null);
+                //erroralert.setContentText(null);
                 erroralert.showAndWait();
             }
         });

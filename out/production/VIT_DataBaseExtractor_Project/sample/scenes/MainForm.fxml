@@ -9,16 +9,16 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.control.Tooltip?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="825.0" prefWidth="1143.0" style="-fx-background-color: #191970;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.Controller">
    <children>
-      <ComboBox fx:id="cbDBSelect" layoutX="14.0" layoutY="41.0" prefWidth="150.0"/>
-      <AnchorPane layoutX="190.0" layoutY="14.0" prefHeight="120.0" prefWidth="218.0" style="-fx-background-color: #4682B4;">
+      <ComboBox fx:id="cbDBSelect" layoutX="14.0" layoutY="41.0" prefWidth="150.0" />
+      <AnchorPane layoutX="190.0" layoutY="14.0" prefHeight="96.0" prefWidth="218.0" style="-fx-background-color: #4682B4;">
          <children>
             <Label layoutX="6.0" layoutY="6.0" text="Start Date and Time" textFill="WHITE" underline="true" />
             <DatePicker fx:id="dpStartDate" layoutX="16.0" layoutY="27.0" prefHeight="25.0" prefWidth="190.0" promptText="Select Date" />
@@ -27,44 +27,11 @@
             <ComboBox fx:id="cbStartHour" layoutX="42.0" layoutY="57.0" prefHeight="25.0" prefWidth="56.0" />
             <ComboBox fx:id="cbStartMinute" layoutX="148.0" layoutY="57.0" prefHeight="25.0" prefWidth="56.0" />
 
-            <Button fx:id="btnTodayFast" layoutX="150.0" layoutY="90.0" mnemonicParsing="false">
-                <tooltip><Tooltip text="Set time period as today"/></tooltip>
-                <graphic>
-                    <ImageView fitWidth="15" fitHeight="15">
-                        <image>
-                            <Image url="@../assets/today_arrow.png" />
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-
-             <Button fx:id="btnWeekAgoFast" layoutX="100.0" layoutY="89.0" mnemonicParsing="false">
-                 <tooltip><Tooltip text="Set time period as previous week"/></tooltip>
-                 <graphic>
-                     <ImageView fitWidth="15" fitHeight="15">
-                         <image>
-                             <Image url="@../assets/week_ago_button.png" />
-                         </image>
-                     </ImageView>
-                 </graphic>
-             </Button>
-
-             <Button fx:id="btnMonthAgoFast" layoutX="50.0" layoutY="89.0" mnemonicParsing="false">
-                 <tooltip><Tooltip text="Set time period as previous month"/></tooltip>
-                 <graphic>
-                     <ImageView fitWidth="15" fitHeight="15">
-                         <image>
-                             <Image url="@../assets/month_ago_button.png" />
-                         </image>
-                     </ImageView>
-                 </graphic>
-             </Button>
-
 
              
          </children>
       </AnchorPane>
-      <AnchorPane layoutX="416.0" layoutY="15.0" prefHeight="120.0" prefWidth="218.0" style="-fx-background-color: #4682B4;">
+      <AnchorPane layoutX="416.0" layoutY="15.0" prefHeight="96.0" prefWidth="218.0" style="-fx-background-color: #4682B4;">
          <children>
             <Label layoutX="6.0" layoutY="6.0" text="End Date and Time" textFill="WHITE" underline="true" />
             <DatePicker fx:id="dpEndDate" layoutX="16.0" layoutY="27.0" prefHeight="25.0" prefWidth="190.0" promptText="Select Date" />
@@ -79,7 +46,7 @@
             <Font size="14.0" />
          </font>
       </Button>
-     <TableView fx:id="tvDataTable" layoutX="14.0" layoutY="138.0" prefHeight="627.0" prefWidth="1119.0" style="-fx-background-color: #4682B4;">
+     <TableView fx:id="tvDataTable" layoutX="14.0" layoutY="146.0" prefHeight="619.0" prefWidth="1119.0" style="-fx-background-color: #4682B4;">
       </TableView>
       <Label layoutX="18.0" layoutY="774.0" prefHeight="17.0" prefWidth="106.0" text="Program cycle time:" textFill="WHITE" />
       <Label fx:id="lbCycleTime" layoutX="127.0" layoutY="776.0" prefHeight="17.0" prefWidth="160.0" text="--" textFill="WHITE" />
@@ -179,6 +146,58 @@
             <Font size="10.0" />
          </font>
       </Label>
-      <Button fx:id="btnExport" layoutX="12.0" layoutY="74.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="64.0" text="Export..." />
+      <!--<Button fx:id="btnExport" layoutX="12.0" layoutY="74.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="64.0" text="Export..." />-->
+
+       <Button fx:id="btnMonthAgoFast" layoutX="190.0" layoutY="114.0" mnemonicParsing="false">
+           <tooltip>
+            <Tooltip text="Set time period as previous month" />
+         </tooltip>
+           <graphic>
+               <ImageView fitHeight="15" fitWidth="15">
+                   <image>
+                       <Image url="@../assets/month_ago_button.png" />
+                   </image>
+               </ImageView>
+           </graphic>
+       </Button>
+
+       <Button fx:id="btnWeekAgoFast" layoutX="230.0" layoutY="114.0" mnemonicParsing="false">
+           <tooltip>
+            <Tooltip text="Set time period as previous week" />
+         </tooltip>
+           <graphic>
+               <ImageView fitHeight="15" fitWidth="15">
+                   <image>
+                       <Image url="@../assets/week_ago_button.png" />
+                   </image>
+               </ImageView>
+           </graphic>
+       </Button>
+
+      <Button fx:id="btnTodayFast" layoutX="270.0" layoutY="114.0" mnemonicParsing="false">
+          <tooltip>
+            <Tooltip text="Set time period as today" />
+         </tooltip>
+          <graphic>
+              <ImageView fitHeight="15" fitWidth="15">
+                  <image>
+                      <Image url="@../assets/today_arrow.png" />
+                  </image>
+              </ImageView>
+          </graphic>
+      </Button>
+
+       <Button fx:id="btnExport" layoutX="310.0" layoutY="114.0" mnemonicParsing="false">
+           <tooltip>
+               <Tooltip text="Export data" />
+           </tooltip>
+           <graphic>
+               <ImageView fitHeight="15" fitWidth="15">
+                   <image>
+                       <Image url="@../assets/save_blue_32px.png" />
+                   </image>
+               </ImageView>
+           </graphic>
+       </Button>
    </children>
 </AnchorPane>
