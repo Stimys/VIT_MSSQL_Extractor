@@ -12,6 +12,8 @@ import sample.Main;
 
 import java.io.IOException;
 
+//Class is not active
+
 public class LogInController{
 
     private Alert informationAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -51,7 +53,7 @@ public class LogInController{
             else if(tfPassword.getText().equals(PASSWORD)){
 
                 FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/sample/scenes/sample.fxml"));
+                loader.setLocation(getClass().getResource("/sample/scenes/MainForm.fxml"));
 
                 try {
                     loader.load();

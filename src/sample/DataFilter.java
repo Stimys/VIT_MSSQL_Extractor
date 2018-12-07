@@ -3,8 +3,13 @@ package sample;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.Alert;
+import sample.obj.Data;
+
 import java.util.function.Predicate;
 
+/**
+ * Class for filtering data in DataTable
+ */
 public class DataFilter {
 
     private Alert erroralert  = new Alert(Alert.AlertType.ERROR);
@@ -30,7 +35,7 @@ public class DataFilter {
         if(searchValue == null || searchValue.isEmpty()){
             erroralert.setTitle("Error!");
             erroralert.setHeaderText(null);
-            erroralert.setContentText("Please fill the search text field!");
+            erroralert.setContentText("Please enter the search text field!");
             erroralert.showAndWait();
         }
         else{

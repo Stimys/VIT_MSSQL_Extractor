@@ -5,13 +5,19 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Class for set time at the main stage
+ */
 public class SetTime {
     private Calendar c;
     private Date date;
     private int i;
     private LocalDate localDate;
 
-
+    /**
+     * Current time
+     * @return LocalDate localDate
+     */
     public LocalDate setRealTime(){
         c = Calendar.getInstance();
         date = c.getTime();
@@ -20,6 +26,10 @@ public class SetTime {
         return localDate;
     }
 
+    /**
+     * Set previous week start time
+     * @return LocalDate localdate
+     */
     public LocalDate setPrivWeekStart(){
         Date date = new Date();
         c = Calendar.getInstance();
@@ -32,6 +42,10 @@ public class SetTime {
         return localDate;
     }
 
+    /**
+     * Set previous week end time
+     * @return LocalDate localdate
+     */
     public LocalDate setPrivWeekEnd(){
         c.add(Calendar.DATE, 6);
         date = c.getTime();
@@ -40,6 +54,10 @@ public class SetTime {
         return localDate;
     }
 
+    /**
+     * Set previous month start time
+     * @return LocalDate localdate
+     */
     public LocalDate setPrivMonthStart(){
         c = Calendar.getInstance();
         c.add(Calendar.MONTH, -1);
@@ -50,6 +68,10 @@ public class SetTime {
         return localDate;
     }
 
+    /**
+     * Set previous month end time
+     * @return LocalDate localdate
+     */
     public LocalDate setPrivMonthStartEnd(){
         c.set(Calendar.DATE, c.getActualMaximum(Calendar.DAY_OF_MONTH));
         date = c.getTime();

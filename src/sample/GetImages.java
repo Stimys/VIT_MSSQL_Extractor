@@ -1,6 +1,7 @@
 package sample;
 
 import sample.controllers.GetImageController;
+import sample.ini.RepairStationConfigIni;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
+
+/**
+ * Class which downloads images from selected Repair Machine
+ */
 
 public class GetImages extends Thread {
 
@@ -76,7 +80,12 @@ public class GetImages extends Thread {
         return copiedFileCounter;
     }
 
-    public void getImages(String defectType){
+    /**
+     * Module which initializes from where program should download images.
+     * @param defectType
+     */
+
+    public void setDefectType(String defectType){
 
         repairStation = new RepairStationConfigIni(sourceDir);
         String currentIP = "\\\\"+repairStation.getIP()+"\\";
@@ -99,6 +108,11 @@ public class GetImages extends Thread {
         }
     }
 
+    /**
+     * Initializing download folder by defect type
+     * @param folderDefectType
+     * @return String folderName;
+     */
     private String defectTypeFolderSelect(String folderDefectType){
         String folderName = null;
 
@@ -168,6 +182,9 @@ public class GetImages extends Thread {
         return folderName;
     }
 
+    /**
+     *Launches copy process
+     */
     public void run() {
 
         listOfFiles = folder.listFiles();

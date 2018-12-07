@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -31,7 +32,7 @@
             </Label>
             <ImageView fitHeight="112.0" fitWidth="108.0" layoutX="216.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../assests/fox_alpha_layer.png" />
+                  <Image url="@../assets/fox_alpha_layer.png" />
                </image>
             </ImageView>
             <Label layoutX="27.0" layoutY="130.0" text="Quality of inspection(%)" textFill="WHITE" />
@@ -42,6 +43,7 @@
             <Label fx:id="lbTopThree" layoutX="27.0" layoutY="226.0" text="3)" textFill="WHITE" />
             <Label fx:id="lbTopFour" layoutX="27.0" layoutY="243.0" text="4)" textFill="WHITE" />
             <Label fx:id="lbTopFive" layoutX="27.0" layoutY="260.0" text="5)" textFill="WHITE" />
+            <TextArea fx:id="taTopFalseAlarmsArea" editable="false" layoutX="15.0" layoutY="196.0" prefHeight="112.0" prefWidth="266.0" style="-fx-background-color: #CDD2D3;" />
          </children>
          <opaqueInsets>
             <Insets right="1.0" />

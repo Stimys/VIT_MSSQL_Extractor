@@ -1,4 +1,6 @@
 package sample.controllers;
+
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -12,43 +14,70 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.MenuItem;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sample.*;
+import sample.ini.LineXMLIni;
+import sample.obj.Data;
+import sample.obj.ProductLine;
 
-import java.util.Date;
+import java.util.*;
+import java.util.List;
+
+/**
+ * Controller of the main window
+ */
 
 public class Controller {
 
+    /**
+     * Images for buttons
+     */
+
+    //Image image = new Image(getClass().getResourceAsStream("assets/today_arrow.jpg"));
+
+    /**
+     * Declaring all main variables
+     */
     public static String fileName;
+    public static long actualErrors = 0;
+    public static boolean firstLunch = true;
+
+    private DropShadow btnShadow = new DropShadow();
+    private long unixStartTime = 0;
+    private long unixEndTime = 0;
+    private SetTime time = new SetTime();
+
+    private final String[] searchTypes = {"Product","Topology","Model","Part Number","Defect","Machine"};
+
+    //private List<String> linesList;
+    private List<ProductLine> lineObjList;
+
+    private DbRequest dbRequest;
+
     DateTimeFormatter dateformat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     SimpleDateFormat fulldateformat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
-    private DropShadow btnShadow = new DropShadow();
 
     Alert warningalert = new Alert(Alert.AlertType.WARNING);
     Alert erroralert  = new Alert(Alert.AlertType.ERROR);
     Alert informationalert = new Alert(Alert.AlertType.INFORMATION);
 
-    public static boolean firstLunch = true;
-
-    private long unixStartTime = 0;
-    private long unixEndTime = 0;
-    private SetTime time = new SetTime();
-    public static long actualErrors = 0;
-
-    private final String VARROCLINES = "Varroc Lines";
-    private final String SIEMENSLINE = "Siemens Line";
-    private final String FUJILONG = "FujiLong Line";
-    private final String AOI5KSERVER = "5K Server";
+    /**
+     * Connecting all window elements from XML file
+     */
 
     @FXML
     private ComboBox<String> cbDBSelect;
+
+    @FXML
+    private ComboBox<String> cbSearchType;
+
+    @FXML
+    private ComboBox<String> cbSearchObject;
 
     @FXML
     private DatePicker dpStartDate;
@@ -59,8 +88,8 @@ public class Controller {
     @FXML
     private ComboBox<String> cbStartMinute;
 
-    @FXML
-    private CheckBox chbSaveReport;
+//    @FXML
+//    private CheckBox chbSaveReport;
 
     @FXML
     private DatePicker dpEndDate;
@@ -102,19 +131,16 @@ public class Controller {
     private MenuItem menuExit;
 
     @FXML
-    private MenuItem menuPrevWeek;
-
-    @FXML
-    private MenuItem menuPrevMonth;
-
-    @FXML
-    private MenuItem menuToday;
-
-    @FXML
     private MenuItem menuAbout;
 
+//    @FXML
+//    private MenuItem menuGetImages;
+
     @FXML
-    private MenuItem menuGetImages;
+    private MenuItem menuImageExtractor;
+
+    @FXML
+    private MenuItem menuVITImageManager;
 
     @FXML
     private Label falseAlarmlabel;
@@ -138,19 +164,66 @@ public class Controller {
     private Button btnSearch;
 
     @FXML
-    private TextField tfSearchValue;
+    private Button btnExport;
+
+    @FXML
+    private Button btnClear;
+
+    @FXML
+    private Label lbVersion;
+
+    @FXML
+    private Button btnTodayFast;
+
+    @FXML
+    private Button btnMonthAgoFast;
+
+    @FXML
+    private Button btnWeekAgoFast;
 
     @FXML
     void initialize() {
 
+        lbVersion.setText("v."+Main.VERSION);
         errorInformationPanel.setVisible(false);
+        btnExport.setDisable(true);
 
-        cbDBSelect.getItems().addAll(AOI5KSERVER, SIEMENSLINE, FUJILONG);
+        //linesList = new LinesIni().initialization();
+        lineObjList = new LineXMLIni().parse();
+        /**
+         * Adding values to the combo boxes
+         */
+        //for(String line : linesList) cbDBSelect.getItems().add(line);
+
+        if(lineObjList.size() != 0){
+            for(int i = 0; i < lineObjList.size(); i++){
+                cbDBSelect.getItems().add(lineObjList.get(i).getName());
+            }
+            cbDBSelect.setValue(lineObjList.get(0).getName());
+        }
+        else{
+            warningalert.setTitle("Warning");
+            warningalert.setHeaderText(null);
+            warningalert.setContentText("Initialization.xml file is empty! No lines to be to display");
+
+            warningalert.showAndWait();
+        }
+
+        setRealTime();
+
+        for(int i =0; i < 6; i++){
+            cbSearchType.getItems().add(searchTypes[i]);
+        }
+
         cbStartHour.getItems().addAll("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23");
         cbStartMinute.getItems().addAll("00","05","10","15","20","25","30","35","40","45","50","55");
         cbEndHour.getItems().addAll("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23");
         cbEndMinute.getItems().addAll("00","05","10","15","20","25","30","35","40","45","50","55");
 
+        /**
+         * Creating main columns
+         * The basis is Data class
+         */
         TableColumn <Data, String> productNameColumn = new TableColumn<>("Product Name");
         TableColumn <Data, String> topologyColumn = new TableColumn<>("Topology");
         TableColumn <Data, String> modelColumn = new TableColumn<>("Model");
@@ -161,6 +234,9 @@ public class Controller {
         TableColumn <Data, String> dateColumn = new TableColumn<>("Date");
         TableColumn <Data, String> operatorColumn = new TableColumn<>("Operator ID");
 
+        /**
+         * Adding columns properties
+         */
         productNameColumn.setMinWidth(100);
         productNameColumn.setEditable(false);
         productNameColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
@@ -189,16 +265,29 @@ public class Controller {
         operatorColumn.setEditable(false);
         operatorColumn.setCellValueFactory(new PropertyValueFactory<>("operatorID"));
 
+        /**
+         * Adding button animation
+         */
         btnShadow.setColor(Color.WHITE);
         btnShadow.setRadius(20);
         btnUpdate.setOnMouseEntered(event -> {btnUpdate.setEffect(btnShadow);});
-
         btnUpdate.setOnMouseExited(event -> {btnUpdate.setEffect(null);});
 
+        /**
+         * Button 'Update' listener
+         */
         btnUpdate.setOnAction(event -> {
+
+            /**
+             * Starting time period for Cycletimer
+             */
             long startTime = System.currentTimeMillis();
             actualErrors = 0;
 
+            /**
+             * Checking if all fields are filled
+             * If not, showing error message, else execute database request
+             */
             if(dpStartDate.getValue() == null || dpEndDate.getValue() == null || cbStartHour.getValue()==null || cbStartMinute.getValue()==null || cbEndHour.getValue()==null || cbEndMinute.getValue()==null || cbDBSelect.getValue() == null) {
                 warningalert.setTitle("Input Error!");
                 warningalert.setHeaderText(null);
@@ -207,6 +296,10 @@ public class Controller {
                 warningalert.showAndWait();
             }
             else {
+                /**
+                 * Collecting date from Datepicker and time combo boxes
+                 * And leading it to the UNIX time format
+                 */
                 LocalDate date = dpStartDate.getValue();
                 String stringStartTime = date.format(dateformat) + " " + cbStartHour.getValue() + ":" + cbStartMinute.getValue();
                 date = dpEndDate.getValue();
@@ -227,77 +320,97 @@ public class Controller {
                     erroralert.showAndWait();
                 }
 
+                /**
+                 * Creating new Database connection and  Database request
+                 * IPs, dataBasenames, user and password are taking from DbConfig.properties
+                 */
                 DbConnection dbConnection = new DbConnection();
-                DataBaseConfigInitialization config = new DataBaseConfigInitialization();
-                DbRequest request = new DbRequest();
+                //DataBaseConfigInitialization config = new DataBaseConfigInitialization();
+                dbRequest = new DbRequest();
 
-                if (cbDBSelect.getValue().equals(AOI5KSERVER)) {
-                    dbConnection.dbConnect(config.configInitialization("5KServer"), config.userInitialization(), config.passwordInitialization());
-                    fileName = fileNameInitialization(AOI5KSERVER);
-                    request.request(unixStartTime, unixEndTime, dbConnection, chbSaveReport.isSelected());
-                } else if (cbDBSelect.getValue().equals(SIEMENSLINE)) {
-                    dbConnection.dbConnect(config.configInitialization("Siemens"), config.userInitialization(), config.passwordInitialization());
-                    fileName = fileNameInitialization(SIEMENSLINE);
-                    request.request(unixStartTime, unixEndTime, dbConnection, chbSaveReport.isSelected());
-
-                } else if (cbDBSelect.getValue().equals(FUJILONG)) {
-                    dbConnection.dbConnect(config.configInitialization("FujiLong"), config.userInitialization(), config.passwordInitialization());
-                    fileName = fileNameInitialization(FUJILONG);
-                    request.request(unixStartTime, unixEndTime, dbConnection, chbSaveReport.isSelected());
-                }
-                else if(cbDBSelect.getValue().equals(VARROCLINES)){
-                    dbConnection.dbConnect(config.configInitialization("5KServer"), config.userInitialization(), config.passwordInitialization());
-                    fileName = fileNameInitialization(VARROCLINES);
-                    request.request(unixStartTime, unixEndTime, dbConnection, chbSaveReport.isSelected());
-
+                /**
+                 * Based on selected DB(production line), making DB connection initialization and sending request
+                 */
+                for(ProductLine line : lineObjList){
+                    if(line.getName().equals(cbDBSelect.getValue())){
+                        dbConnection.makeConnection("jdbc:sqlserver://"+line.getIp()+";database="+line.getDataBaseName(),line.getUser(),line.getPassword());
+                        fileName = line.getName()+"_Report.xls";
+                        dbRequest.makeRequest(unixStartTime, unixEndTime, dbConnection);
+                    }
                 }
 
-                tvDataTable.setItems(DbRequest.datalist);
+                /**
+                 * Adding list with all data to the table
+                 */
+                //tvDataTable.setItems(DbRequest.datalist);
 
+                tvDataTable.setItems(DbRequest.getDataList());
+
+                /**
+                 * If there was no request yet, so adding all columns to the main table, else just refresh the table with new data
+                 */
                 if (firstLunch) {
                     tvDataTable.getColumns().addAll(productNameColumn, topologyColumn, modelColumn, partNumberColumn, errorColumn, machineColumn, codeColumn, dateColumn, operatorColumn);
                     errorInformationPanel.setVisible(true);
                     firstLunch = false;
+                    btnExport.setDisable(false);
                 }
                 else{
                    tvDataTable.refresh();
                 }
 
+                /**
+                 * Filling additional information values
+                 */
                 lbPanelsValue.setText(Integer.toString(DbRequest.panels));
                 lbErrorValue.setText(Long.toString(DbRequest.errors));
-                lbFalseAlarmValue.setText(Long.toString(DbRequest.falsealarmvalue));
-                actualErrors = DbRequest.errors - DbRequest.falsealarmvalue;
+                lbFalseAlarmValue.setText(Long.toString(DbRequest.falseAlarmValue));
+                actualErrors = DbRequest.errors - DbRequest.falseAlarmValue;
                 lbActualErrors.setText(Long.toString(actualErrors));
                 long endTime = System.currentTimeMillis() - startTime;
 
-                if(chbSaveReport.isSelected()){
-                    FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(getClass().getResource("/sample/scenes/FileOpenWindow.fxml"));
-                    try {
-                        loader.load();
-                    }
-                    catch (IOException e){
-                        erroralert.setTitle("An Error Occurred!");
-                        erroralert.setHeaderText("Error in opening file: FileOpenWindow.fxml");
-                        erroralert.setContentText(e.toString());
-                        erroralert.showAndWait();
-                    }
-
-                    Parent root = loader.getRoot();
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(root));
-                    stage.setTitle("Report File");
-                    stage.setResizable(false);
-                    stage.initModality(Modality.WINDOW_MODAL);
-                    stage.initOwner(Main.primaryStage);
-                    stage.showAndWait();
-                }
-                lbCycleTime.setText(endTime + " ms");
+//                /**
+//                 * If checkbox 'Save report' is checked, so creating and showing new window from FXML file
+//                 */
+//                if(chbSaveReport.isSelected()){
+//                    FXMLLoader loader = new FXMLLoader();
+//                    loader.setLocation(getClass().getResource("/sample/scenes/FileOpenWindow.fxml"));
+//                    try {
+//                        loader.load();
+//                    }
+//                    catch (IOException e){
+//                        erroralert.setTitle("An Error Occurred!");
+//                        erroralert.setHeaderText("Error in opening file: FileOpenWindow.fxml");
+//                        erroralert.setContentText(e.toString());
+//                        erroralert.showAndWait();
+//                    }
+//
+//                    Parent root = loader.getRoot();
+//                    Stage stage = new Stage();
+//                    stage.setScene(new Scene(root));
+//                    stage.setTitle("Report File");
+//                    stage.setResizable(false);
+//                    stage.initModality(Modality.WINDOW_MODAL);
+//                    stage.initOwner(Main.primaryStage);
+//                    stage.showAndWait();
+//                }
+                /**
+                 * Showing cycle time
+                 */
+                lbCycleTime.setText(endTime + " ms;"+ " Rows: "+ DbRequest.getDataList().size());
             }
         });
 
+        /**
+         * Menu 'Exit' button listener
+         * To close main program window
+         */
         menuExit.setOnAction(event -> Platform.exit());
 
+        /**
+         * Menu 'About' button listener
+         * Showing window with all information
+         */
         menuAbout.setOnAction(event -> {
             informationalert.setTitle("About");
             informationalert.setHeaderText(null);
@@ -310,29 +423,34 @@ public class Controller {
             informationalert.showAndWait();
         });
 
+        /**
+         * Menu 'DataBase Configuration' button listener
+         * Showing window with DBs configurations
+         */
         menuDBconfig.setOnAction(event -> {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/sample/scenes/DataBaseConfiguration.fxml"));
+
+            String iniXMLFilePath = System.getProperty("user.dir") + File.separator+ "Config"+ File.separator + "initialization.xml";
 
             try {
-                loader.load();
+                    Runtime.getRuntime().exec("explorer "+iniXMLFilePath);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 erroralert.setTitle("An Error Occurred!");
-                erroralert.setHeaderText("Error in opening file: DataBaseConfiguration.fxml");
+                erroralert.setHeaderText("Error in opening file: initialization.xml");
                 erroralert.setContentText(e.toString());
                 erroralert.showAndWait();
             }
-
-            Parent root = loader.getRoot();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Database configuration");
-            stage.setResizable(false);
-            stage.showAndWait();
         });
 
+        /**
+         * 'More' button listener
+         * Showing window with all addition information
+         */
         btnMoreInformation.setOnAction(event -> {
+
+
+
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/sample/scenes/AdditionalInformation.fxml"));
 
@@ -353,46 +471,18 @@ public class Controller {
             stage.showAndWait();
         });
 
-        menuPrevWeek.setOnAction(event -> {
-            cbStartHour.setValue("00");
-            cbStartMinute.setValue("05");
-            cbEndHour.setValue("23");
-            cbEndMinute.setValue("55");
+        btnWeekAgoFast.setOnAction(event -> { setTimeToPrivWeek(); });
+        btnMonthAgoFast.setOnAction(event -> {setTimeToPrivMonth(); });
+        btnTodayFast.setOnAction(event -> { setRealTime(); });
 
-            dpStartDate.setValue(time.setPrivWeekStart());
-            dpEndDate.setValue(time.setPrivWeekEnd());
-        });
-
-        menuPrevMonth.setOnAction(event -> {
-            cbStartHour.setValue("00");
-            cbStartMinute.setValue("05");
-            cbEndHour.setValue("23");
-            cbEndMinute.setValue("55");
-
-            dpStartDate.setValue(time.setPrivMonthStart());
-            dpEndDate.setValue(time.setPrivMonthStartEnd());
-
-        });
-
-        menuToday.setOnAction(event -> {
-
-            cbStartHour.setValue("00");
-            cbStartMinute.setValue("05");
-            cbEndHour.setValue("23");
-            cbEndMinute.setValue("55");
-
-            dpStartDate.setValue(time.setRealTime());
-            dpEndDate.setValue(time.setRealTime());
-        });
-
+        /**
+         * Menu 'Open Directory' button listener
+         * Opening root directory of the program
+         */
         menuFolder.setOnAction(event -> {
-
             String localpath = System.getProperty("user.dir");
-//            File mainDirectory = new File(localpath);
-//            Desktop desktop = Desktop.getDesktop();
 
             try {
-                //desktop.open(mainDirectory);
                 Runtime.getRuntime().exec("explorer "+localpath);
             }
             catch (IOException e){
@@ -403,15 +493,70 @@ public class Controller {
             }
         });
 
+        /**
+         * 'Search' button listener
+         * Starts search module (function)
+         */
         btnSearch.setOnAction(event -> {
-            if(!firstLunch){
-                if(tfSearchValue.getText() == null || tfSearchValue.getText().isEmpty()){
-                    tvDataTable.setItems(DbRequest.datalist);
-                }
-                else{
-                    search();
+
+            /**
+             * Checks if there was request to the database, if not, so shows error window, else execute search function
+             */
+            if(cbSearchObject.getValue() == null){
+
+                erroralert.setTitle("An Error Occurred!");
+                erroralert.setHeaderText("Nothing to search!");
+                erroralert.setContentText(null);
+                erroralert.showAndWait();
+            }
+            else{
+                search(cbSearchObject.getValue());
+            }
+
+        });
+
+        btnClear.setOnAction(event -> {
+            cbSearchObject.setValue("");
+            tvDataTable.setItems(DbRequest.getDataList());
+        });
+
+        cbSearchType.setOnAction(event -> {
+            if(!firstLunch) {
+                Integer selectObject = 0;
+                Set<Set<String>> objectList = new LinkedHashSet<>();
+                objectList = dbRequest.fillingDataFilterList(objectList);
+
+                Iterator<Set<String>> iterator = objectList.iterator();
+
+                if (cbSearchType.getValue().equals(searchTypes[0])) {
+                    //do nothing
+                } else if (cbSearchType.getValue().equals(searchTypes[1])) {
+                    selectObject = 1;
+
+                } else if (cbSearchType.getValue().equals(searchTypes[2])) {
+                    selectObject = 2;
+
+                } else if (cbSearchType.getValue().equals(searchTypes[3])) {
+                    selectObject = 3;
+
+                } else if (cbSearchType.getValue().equals(searchTypes[4])) {
+                    selectObject = 4;
+
+                } else if (cbSearchType.getValue().equals(searchTypes[5])) {
+                    selectObject = 5;
+
                 }
 
+                for (int i = 0; i < selectObject; i++) {
+                    iterator.next();
+                }
+
+                Iterator<String> sIterator = iterator.next().iterator();
+                cbSearchObject.getItems().clear();
+
+                while (sIterator.hasNext()) {
+                    cbSearchObject.getItems().add(sIterator.next());
+                }
             }
             else{
                 erroralert.setTitle("An Error Occurred!");
@@ -419,10 +564,13 @@ public class Controller {
                 erroralert.setContentText(null);
                 erroralert.showAndWait();
             }
-
         });
 
-        menuGetImages.setOnAction(event -> {
+        /**
+         * Menu 'ImageExtractor' button listener
+         * Opens image downloader window
+         */
+        menuImageExtractor.setOnAction(event -> {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/sample/scenes/GetImagesForm.fxml"));
 
@@ -441,32 +589,91 @@ public class Controller {
             stage.setResizable(false);
             stage.showAndWait();
         });
+
+        /**
+         * Menu 'VITImageManager' button listener
+         * Launch 'VITImageManaget.exe', which is located in the main 'VIT' folder
+         */
+        menuVITImageManager.setOnAction(event -> {
+            String pathVITImageManager = "C:"+File.separator+"VIT"+File.separator+"VITImageManager.exe";
+            File check = new File(pathVITImageManager);
+
+            try{
+                if(check.exists()){
+                    Runtime.getRuntime().exec("explorer "+pathVITImageManager);
+                }
+                else{
+                    erroralert.setTitle("An Error Occurred!");
+                    erroralert.setHeaderText("File C:/VIT/VITImageManager.exe is not found!");
+                    erroralert.setContentText(null);
+                    erroralert.showAndWait();
+                }
+
+            } catch (IOException e){
+                erroralert.setTitle("An Error Occurred!");
+                erroralert.setHeaderText("File C:/VIT/VITImageManager.exe is not found!");
+                erroralert.setContentText(e.toString());
+                erroralert.showAndWait();
+            }
+        });
+
+        btnExport.setOnAction(event -> {
+            if(!firstLunch){
+                ExportToFile export = new ExportToFile(fileName);
+                if(export.export()){
+                    informationalert.setTitle("Successful");
+                    informationalert.setHeaderText("Exporting completed");
+                    informationalert.setContentText(fileName+" has been save in 'Files' folder");
+                    informationalert.showAndWait();
+                }
+            } else{
+                erroralert.setTitle("An Error Occurred!");
+                erroralert.setHeaderText("No data to export!");
+                erroralert.setContentText(null);
+                erroralert.showAndWait();
+            }
+        });
     }
 
-    private void search(){
-        DataFilter filter = new DataFilter(DbRequest.datalist, tfSearchValue.getText());
+    /**
+     * Module which sorts the data in datalist (MainTable)
+     * @param searchText
+     */
+    private void search(String searchText){
+        DataFilter filter = new DataFilter(DbRequest.getDataList(), searchText);
         SortedList<Data> sortedData = new SortedList<>(filter.search());
         sortedData.comparatorProperty().bind(tvDataTable.comparatorProperty());
         tvDataTable.setItems(sortedData);
         tvDataTable.refresh();
     }
 
-    private String fileNameInitialization (String productionLineName){
-        String filename = null;
+    private void setRealTime(){
+        cbStartHour.setValue("00");
+        cbStartMinute.setValue("05");
+        cbEndHour.setValue("23");
+        cbEndMinute.setValue("55");
 
-        if(productionLineName.equals(AOI5KSERVER)){
-            filename = "AOI_5K_Server_Report.xls";
-        }
-        else if(productionLineName.equals(SIEMENSLINE)){
-            filename = "AOI_Siemens_Line_Report.xls";
-        }
-        else if(productionLineName.equals(FUJILONG)){
-            filename = "AOI_FujiLong_Line_Report.xls";
-        }
-        else if(productionLineName.equals(VARROCLINES)){
-            filename = "Varroc_Lines";
-        }
+        dpStartDate.setValue(time.setRealTime());
+        dpEndDate.setValue(time.setRealTime());
+    }
 
-        return filename;
+    private void setTimeToPrivWeek(){
+        cbStartHour.setValue("00");
+        cbStartMinute.setValue("05");
+        cbEndHour.setValue("23");
+        cbEndMinute.setValue("55");
+
+        dpStartDate.setValue(time.setPrivWeekStart());
+        dpEndDate.setValue(time.setPrivWeekEnd());
+    }
+
+    private void setTimeToPrivMonth(){
+        cbStartHour.setValue("00");
+        cbStartMinute.setValue("05");
+        cbEndHour.setValue("23");
+        cbEndMinute.setValue("55");
+
+        dpStartDate.setValue(time.setPrivMonthStart());
+        dpEndDate.setValue(time.setPrivMonthStartEnd());
     }
 }

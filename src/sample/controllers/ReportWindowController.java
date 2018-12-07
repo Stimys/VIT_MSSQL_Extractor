@@ -8,8 +8,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
+/**
+ * Controller class for FileOpenWindow.fxml
+ * Not active
+ */
 public class ReportWindowController {
 
+    private final String localpath = System.getProperty("user.dir");
     Alert erroralert  = new Alert(Alert.AlertType.ERROR);
 
         @FXML
@@ -31,8 +36,7 @@ public class ReportWindowController {
 
             btnYes.setOnAction(event -> {
                 Desktop desktop = Desktop.getDesktop();
-                String localpath = System.getProperty("user.dir");
-                String filepath = localpath + File.separator +"Files\\"+ Controller.fileName;
+                String filepath = localpath + File.separator +"Files"+File.separator+ Controller.fileName;
                 File aoiReportFile = new File(filepath);
 
                 try {
@@ -51,7 +55,6 @@ public class ReportWindowController {
 
             btnShowFolder.setOnAction(event -> {
                 Desktop desktop = Desktop.getDesktop();
-                String localpath = System.getProperty("user.dir");
                 String filepath = localpath + File.separator +"Files";
                 File aoiReportFile = new File(filepath);
 

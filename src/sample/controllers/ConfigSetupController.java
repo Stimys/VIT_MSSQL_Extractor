@@ -9,6 +9,9 @@ import javafx.stage.Stage;
 
 import java.util.Properties;
 
+
+//Class is not active
+
 public class ConfigSetupController {
 
     Properties prob = new Properties();

@@ -1,0 +1,22 @@
+<?xml version = "1.0"?>
+<class>
+	<repair_machine id = "1">
+		<name>Fuji_Short</name>
+		<ip>10.100.127.171</ip>
+	</repair_machine>
+
+	<repair_machine id = "2">
+		<name>Varroc_White</name>
+		<ip>10.100.127.172</ip>
+	</repair_machine>
+
+	<repair_machine id = "3">
+		<name>Varroc_Black</name>
+		<ip>10.100.127.173</ip>
+	</repair_machine>
+
+	<repair_machine id = "4">
+		<name>Fuji_Long_Pre</name>
+		<ip>10.100.127.183</ip>
+	</repair_machine>
+</class>

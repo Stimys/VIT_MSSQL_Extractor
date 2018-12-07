@@ -4,12 +4,20 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import sample.GetImages;
-import sample.RepairStationConfigIni;
+import sample.ini.RepairStationConfigIni;
+import sample.ini.RepStationXMLIni;
+import sample.obj.RepairStation;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Controller for GetImagesForm.fxml
+ */
 
 public class GetImageController{
 
@@ -33,6 +41,12 @@ public class GetImageController{
     private boolean btnSaveIPClicked = false;
 
     private RepairStationConfigIni repairStation;
+
+
+    //xml
+    private List<RepairStation> repairStationList;
+
+    //
 
     @FXML
     private DatePicker tpImageStartDate;
@@ -75,35 +89,50 @@ public class GetImageController{
         tfIP.setEditable(false);
         tfIP.setStyle("-fx-control-inner-background:  #aeaeae");
 
+        btnDownload.setDisable(true);
+        btnSetIP.setDisable(true);
+
+        repairStationList = new LinkedList<>();
+        repairStationList = new RepStationXMLIni().parse(repairStationList);
+
         cbImageStartTime.getItems().addAll("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23");
         cbImageEndTime.getItems().addAll("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23");
         cbDefectType.getItems().addAll("False Alarm", "Acceptable", "Missing", "Position", "Rotation","Polarity");
 
-        cbMachineName.getItems().addAll(AOI_DV1_NAME,AOI_DV2_NAME,AOI_DV3_NAME,VITEC_3_NAME);
+        //cbMachineName.getItems().addAll(AOI_DV1_NAME,AOI_DV2_NAME,AOI_DV3_NAME,VITEC_3_NAME);
 
+        for(RepairStation repStation : repairStationList)cbMachineName.getItems().addAll(repStation.getName());
+
+        /**
+         * Button 'Close' listener.
+         * To close GetImageForm.xml file
+         */
         btnClose.setOnAction(event -> {
             Stage stage = (Stage) btnClose.getScene().getWindow();
             stage.close();
         });
 
+        /**
+         * Fill IP text field, after choosing machine name from the combo box
+         */
         cbMachineName.setOnAction(event -> {
-            repairStation = new RepairStationConfigIni(cbMachineName.getValue());
-            if(cbMachineName.getValue()==AOI_DV1_NAME){
-                tfIP.setText(repairStation.getIP());
-            }
-            else if(cbMachineName.getValue()==AOI_DV2_NAME){
-                tfIP.setText(repairStation.getIP());
-            }
-            else if(cbMachineName.getValue()==AOI_DV3_NAME){
-                tfIP.setText(repairStation.getIP());
-            }
-            else if(cbMachineName.getValue()==VITEC_3_NAME){
-                tfIP.setText(repairStation.getIP());
+            for(int i = 0; i < repairStationList.size(); i++){
+                if(cbMachineName.getValue().equals(repairStationList.get(i).getName())){
+                    tfIP.setText(repairStationList.get(i).getIp());
+                }
             }
         });
 
+
+        /**
+         * Button 'Download' listener.
+         * To start process of downloading images from machine.
+         */
         btnDownload.setOnAction(event -> {
 
+            /**
+             * Checking that all fields are filled.
+             */
             if(cbImageStartTime.getValue()==null || cbImageEndTime.getValue()==null || cbMachineName.getValue()==null || tpImageStartDate.getValue() == null || tpImageEndDate.getValue() == null || cbDefectType.getValue()== null){
                 warningalert.setTitle("Warning!");
                 warningalert.setHeaderText("Please fill all fields!");
@@ -116,6 +145,9 @@ public class GetImageController{
                     lbStatus.setVisible(true);
                     lbStatus.setText(processStatus);
 
+                    /**
+                     * Takes date from DatePicker and time from combo box and leads it to UNIX time
+                     */
                     localDate = tpImageStartDate.getValue();
                     String startFileTime = dateformat.format(localDate) + " " + cbImageStartTime.getValue()+":00";
                     date = fulldateformat.parse(startFileTime);
@@ -130,8 +162,12 @@ public class GetImageController{
                     parse = endUnixTime.toString() + "000";
                     endUnixTime = Long.parseLong(parse);
 
+                    /**
+                     * Creates object of GetImages class.
+                     * Send machine name, start and end UNIX time
+                     */
                     GetImages getImages = new GetImages(cbMachineName.getValue(), startUnixTime, endUnixTime);
-                    getImages.getImages(cbDefectType.getValue());
+                    getImages.setDefectType(cbDefectType.getValue());
                     getImages.start();
 
                     getImages.join();
@@ -151,6 +187,11 @@ public class GetImageController{
             }
         });
 
+        /**
+         * Button 'Set IP' listener.
+         * Makes IP text field editable.
+         * Gets IP string from RepairStationConfigIni Class
+         */
         btnSetIP.setOnAction(event -> {
             if(cbMachineName.getValue()!=null) {
                 if (!btnSaveIPClicked) {
@@ -181,4 +222,3 @@ public class GetImageController{
 
     }
 }
-
