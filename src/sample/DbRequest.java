@@ -2,180 +2,177 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import sample.controllers.Controller;
 import sample.obj.Data;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Class which makes request to the DB
+ * Class which makes request to the MSSQL
  */
 
-public class DbRequest {
+public class DbRequest extends Task<ObservableList<Data>> {
 
-    private int arrayCounter;
     private Statement statement = null;
     private ResultSet rs = null;
-    private Alert erroralert  = new Alert(Alert.AlertType.ERROR);
+    private DbConnection dbConn;
 
-    private Set<String> productNameList;
-    private Set<String> topologyList;
-    private Set<String> modelList;
-    private Set<String> partNumberList;
-    private Set<String> errorTypeList;
-    private Set<String> machineList;
+    private CustomAlert alert;
 
-    public static int panels;
-    public static long falseAlarmValue;
-    public static long componentsValue;
-    public static long errors;
+    private long startTimeUnix;
+    private long endTimeUnix;
+    private String machineName;
 
-    public static ArrayList<String> topFalseAlarmModels = new ArrayList<>();
-    public static ArrayList<Integer> topFalseAlarmValue = new ArrayList<>();
+    private SortedSet<String> productNameList = new TreeSet<>();
+    private SortedSet<String> topologyList = new TreeSet<>();
+    private SortedSet<String> modelList = new TreeSet<>();
+    private SortedSet<String> partNumberList = new TreeSet<>();
+    private SortedSet<String> errorTypeList = new TreeSet<>();
+    private SortedSet<String> machineList = new TreeSet<>();
+
+    private Set<String> panelsCodes= new HashSet<>();
+
+    //List to fill combo box 'cbProdMachines' in Controller.class
+    private List<String> machinesNames;
+
     private static ObservableList<Data> datalist = FXCollections.observableArrayList();
 
-    public void makeRequest (long startTime, long endTime, DbConnection connection){
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
+    //With year week at the start of full date
+    //private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("ww dd/MM/yyyy HH:mm:ss");
 
-        productNameList = new LinkedHashSet<>();
-        topologyList = new LinkedHashSet<>();
-        modelList = new LinkedHashSet<>();
-        partNumberList = new LinkedHashSet<>();
-        errorTypeList = new LinkedHashSet<>();
-        machineList = new LinkedHashSet<>();
+    public DbRequest (DbConnection connection, long startTime, long endTime, String machineName){
+        this.startTimeUnix = startTime;
+        this.endTimeUnix = endTime;
+        this.machineName = machineName;
+        this.dbConn = connection;
+        statementInit();
+    }
 
-        boolean arrayFirstTime = true;
-        boolean modelfound = false;
-        arrayCounter= 0;
-        panels = 0;
-        errors = 0;
-        falseAlarmValue = 0;
-        componentsValue = 0;
+    public DbRequest (DbConnection connection){
+        this.dbConn = connection;
+        statementInit();
+    }
 
-        if (!Controller.firstLunch){
-            datalist.clear();
-            topFalseAlarmModels.clear();
-            topFalseAlarmValue.clear();
+    private void statementInit(){
+        try {
+            statement = dbConn.getConnection().createStatement();
+        } catch (SQLException ex){
+            alert = new CustomAlert("An Error Occurred!", "Statement initialization error!",ex.toString(), Alert.AlertType.ERROR);
         }
+    }
+
+    public ObservableList<Data> getFullData (long startTime, long endTime){
+
+        long start = System.currentTimeMillis();
+        datalist.clear();
+        /**
+         * Full MSSQL request
+         */
+        try {
+            rs = statement.executeQuery("SELECT [PRODUCT].[Product_Name], " +
+                    "[TESTED_OBJECT].[Topology], " +
+                    "[TESTED_OBJECT].[Model], " +
+                    "[PART_NUMBER].[Part_Number], " +
+                    "[TESTED_OBJECT].[Repair_Button_Comment], " +
+                    "[MACHINE].[Machine_Name], " +
+                    "[PANELS].[Panel_Bar_Code], " +
+                    "[PANELS].[Nb_Of_Tested_Object], " +
+                    "[TESTED_OBJECT].[Repair_Numeric_Date_Hour], " +
+                    "[OPERATOR].[Operator_Name] " +
+                    "FROM (((((([TESTED_OBJECT] " +
+                    "INNER JOIN [CARDS] ON [TESTED_OBJECT].[Card_ID] = [CARDS].[Card_ID]) " +
+                    "INNER JOIN [PART_NUMBER] ON [TESTED_OBJECT].[Part_Number_ID] = [PART_NUMBER].[Part_Number_ID]) " +
+                    "INNER JOIN [PANELS] ON [CARDS].[Panel_ID] = [PANELS].[Panel_ID]) " +
+                    "INNER JOIN [MACHINE] ON [PANELS].[Machine_ID] = [MACHINE].[Machine_ID]) " +
+                    "INNER JOIN [PRODUCT] ON [PANELS].[Product_ID] = [PRODUCT].[Product_ID]) " +
+                    "INNER JOIN [OPERATOR] ON [TESTED_OBJECT].[Operator_ID] = [OPERATOR].[Operator_ID])" +
+                    "WHERE [TESTED_OBJECT].[Repair_Numeric_Date_Hour] between " + startTime + " and " + endTime);
+
+            getAnswerFromDB(rs);
+            //TODO: optimize write data from result set (rs)
+
+            long end = System.currentTimeMillis() - start;
+            System.out.println("Request Cycle time: "+ end + " ms");
+
+        } catch (SQLException ex){
+            alert = new CustomAlert("An Error Occurred!", "Database request error!", ex.toString(), Alert.AlertType.ERROR);
+            return null;
+        }
+        return getDataList();
+    }
+
+    public ObservableList<Data> getDataByMachine (long startTime, long endTime, String machine){
+
+        long start = System.currentTimeMillis();
+
+        datalist.clear();
+        try{
+            rs = statement.executeQuery("SELECT [PRODUCT].[Product_Name], " +
+                    "[TESTED_OBJECT].[Topology], " +
+                    "[TESTED_OBJECT].[Model], " +
+                    "[PART_NUMBER].[Part_Number], " +
+                    "[TESTED_OBJECT].[Repair_Button_Comment], " +
+                    "[MACHINE].[Machine_Name], " +
+                    "[PANELS].[Panel_Bar_Code], " +
+                    "[PANELS].[Nb_Of_Tested_Object], " +
+                    "[TESTED_OBJECT].[Repair_Numeric_Date_Hour], " +
+                    "[OPERATOR].[Operator_Name] " +
+                    "FROM (((((([TESTED_OBJECT] " +
+                    "INNER JOIN [CARDS] ON [TESTED_OBJECT].[Card_ID] = [CARDS].[Card_ID]) " +
+                    "INNER JOIN [PART_NUMBER] ON [TESTED_OBJECT].[Part_Number_ID] = [PART_NUMBER].[Part_Number_ID]) " +
+                    "INNER JOIN [PANELS] ON [CARDS].[Panel_ID] = [PANELS].[Panel_ID]) " +
+                    "INNER JOIN [MACHINE] ON [PANELS].[Machine_ID] = [MACHINE].[Machine_ID]) " +
+                    "INNER JOIN [PRODUCT] ON [PANELS].[Product_ID] = [PRODUCT].[Product_ID]) " +
+                    "INNER JOIN [OPERATOR] ON [TESTED_OBJECT].[Operator_ID] = [OPERATOR].[Operator_ID])" +
+                    "WHERE [MACHINE].[Machine_Name] ='"+ machine + "' AND " +
+                    "[TESTED_OBJECT].[Repair_Numeric_Date_Hour] between " + startTime + " and " + endTime);
+
+
+            getAnswerFromDB(rs);
+
+            long end = System.currentTimeMillis() - start;
+            System.out.println("Request Cycle time: "+ end + " ms");
+
+        } catch (SQLException ex){
+            alert = new CustomAlert("An Error Occurred!", "Database request error!", ex.toString(), Alert.AlertType.ERROR);
+            return null;
+        }
+        return getDataList();
+    }
+
+    public List<String> getMachineNamesFromDB(){
+        machinesNames = new ArrayList<>();
+
+        final String strMachineType = "Vision";
+        // Types: '1' - Vision, '2' - Repair
+        final int numMachineType = 1;
 
         try{
-            statement = connection.getConnection().createStatement();
+            rs = statement.executeQuery("SELECT [Machine_Name] FROM [MACHINE] WHERE [MACHINE].[Machine_type] = " + numMachineType);
 
-            rs = statement.executeQuery("SELECT Panel_Bar_Code, Panel_Numeric_Date, Nb_Of_Tested_Object FROM PANELS " +
-                    "WHERE PANELS.Panel_Numeric_Date between "+startTime+" and "+ endTime);
-
-            while (rs.next()){
-                componentsValue += rs.getLong(3);
-                panels++;
+            while(rs.next()){
+                machinesNames.add(rs.getString(1));
             }
-
-            rs = statement.executeQuery("SELECT Model, Repair_Button_Comment, Repair_Numeric_Date_Hour FROM TESTED_OBJECT " +
-                    "WHERE Repair_Numeric_Date_Hour between "+startTime+" and "+ endTime);
-
-            /**
-             * Fill arrays topFalseAlarmModels and topFalseAlarmValues
-             * Counting values of false alarms and all errors
-             */
-
-            while(rs.next() ) {
-                errors++;
-                if (rs.getString(2).equals("FALSE ALARM") || rs.getString(2).equals("False Alarm")) {
-                    falseAlarmValue++;
-                    if (arrayFirstTime) {
-                        topFalseAlarmModels.add(0, rs.getString(1));
-                        topFalseAlarmValue.add(0, 1);
-                        arrayFirstTime = false;
-                    } else {
-
-                        for (int i = 0; i < topFalseAlarmModels.size(); i++) {
-                            if (rs.getString(1).equals(topFalseAlarmModels.get(i))) {
-                                arrayCounter = topFalseAlarmValue.get(i);
-                                arrayCounter++;
-                                topFalseAlarmValue.set(i, arrayCounter);
-                                modelfound = true;
-                                i = topFalseAlarmModels.size();
-                            }
-                        }
-                        if (modelfound == false) {
-                            topFalseAlarmModels.add(rs.getString(1));
-                            topFalseAlarmValue.add(1);
-                        } else {
-                            modelfound = false;
-                        }
-                    }
-                }
-            }
-
-            /**
-             * MSSQL request
-             */
-            rs = statement.executeQuery("SELECT PRODUCT.Product_Name, " +
-                    "TESTED_OBJECT.Topology, " +
-                    "TESTED_OBJECT.Model, " +
-                    "PART_NUMBER.Part_Number, " +
-                    "TESTED_OBJECT.Repair_Button_Comment, " +
-                    "MACHINE.Machine_Name, " +
-                    "PANELS.Panel_Bar_Code, " +
-                    "TESTED_OBJECT.Repair_Numeric_Date_Hour, " +
-                    "OPERATOR.Operator_Name "+
-                    "FROM ((((((TESTED_OBJECT " +
-                    "INNER JOIN CARDS ON TESTED_OBJECT.Card_ID = CARDS.Card_ID) " +
-                    "INNER JOIN PART_NUMBER ON TESTED_OBJECT.Part_Number_ID = PART_NUMBER.Part_Number_ID) " +
-                    "INNER JOIN PANELS ON CARDS.Panel_ID = PANELS.Panel_ID) " +
-                    "INNER JOIN MACHINE ON PANELS.Machine_ID = MACHINE.Machine_ID) " +
-                    "INNER JOIN PRODUCT ON PANELS.Product_ID = PRODUCT.Product_ID) " +
-                    "INNER JOIN OPERATOR ON TESTED_OBJECT.Operator_ID = OPERATOR.Operator_ID)"+
-                    "WHERE TESTED_OBJECT.Repair_Numeric_Date_Hour between "+startTime+" and "+ endTime);
-
-//            /**
-//             * If checkbox 'Save report' is checked, so save all data to the xml file
-//             */
-//            if (saveReport) {
-//                String localpath = System.getProperty("user.dir");
-//                String filepath = localpath + File.separator +"Files"+ File.separator + Controller.fileName;
-//                PrintWriter writer = new PrintWriter(filepath, "UTF-8");
-//
-//                writer.println("Product Name \t Topology \t Model \t Part Number \t Error Type \t Machine Name \t Panel Bar Code \t Date \t Operator ID");
-//
-//                while (rs.next()) {
-//                    Long timestamp = rs.getLong(8);
-//                    java.util.Date time = new java.util.Date(timestamp * 1000);
-//
-//                    writer.println(rs.getString(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3) + "\t" + rs.getString(4) + "\t" + rs.getString(5) + "\t" + rs.getString(6) + "\t" + rs.getString(7) + "\t" + time + "\t" + rs.getString(9));
-//                    setData(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6), rs.getString(7), time.toString(),rs.getString(9));
-//                    fillingFilterLists(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6));
-//                }
-//
-//                    writer.close();
-//                }
-//                else{
-                    while (rs.next()) {
-                        Long timestamp = rs.getLong(8);
-                        java.util.Date time = new java.util.Date(timestamp * 1000);
-
-                        setData(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6), rs.getString(7), time.toString(),rs.getString(9));
-                        fillingFilterLists(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6));
-                    }
-
-                //fillingDataFilterList(productNameList,topologyList,modelList,partNumberList,errorTypeList,machineList);
-            Thread.sleep(100);
-        } catch (Exception e){
-            erroralert.setTitle("An Error Occurred!");
-            erroralert.setHeaderText("Request from DataBase Error!");
-            erroralert.setContentText(e.toString());
-            erroralert.showAndWait();
+        } catch (SQLException ex){
+            alert = new CustomAlert("An Error Occurred!", "Machine database list initialization error!",ex.toString(), Alert.AlertType.ERROR);
         }
+
+        return machinesNames;
     }
 
-    private void setData(String productName, String topology, String model, String partNumber, String errorType, String machineName, String panelCode, String date, String operator){
+    private void setData(String productName, String topology, String model, String partNumber, String errorType, String machineName, String panelCode, String date, String operator, String numOfComponents){
 
-        datalist.add(new Data(productName,topology ,model, partNumber ,errorType, machineName, panelCode, date, operator));
-    }
+        datalist.add(new Data(productName,topology ,model, partNumber ,errorType, machineName, panelCode, date, operator, numOfComponents));
 
-    private void fillingFilterLists(String productName, String topology, String model, String partNumber, String errorType, String machineName){
+        //Filling SearchLists
         productNameList.add(productName);
         topologyList.add(topology);
         modelList.add(model);
@@ -195,12 +192,55 @@ public class DbRequest {
         return  dataForFilterList;
     }
 
-
-    public static ObservableList<Data> getDataList(){
+    public ObservableList<Data> getDataList(){
         return datalist;
     }
 
-/*    public Set<Set<String>> getDataForFilterList(){
-        return dataForFilterList;
-    }*/
+    public Set<String> getPanelsCodes (){
+        return panelsCodes;
+    }
+
+    //Method which gets ResultSet as a param.
+    //Get columns from rs and save it in list like an object
+    private void getAnswerFromDB(ResultSet rs){
+        try{
+//            long start = System.currentTimeMillis();
+            while(rs.next()){
+
+                String productName = rs.getString("Product_Name");
+                String topology = rs.getString("Topology");
+                String model = rs.getString("Model");
+                String partNumber = rs.getString("Part_Number");
+                String repairComment = rs.getString("Repair_Button_Comment");
+                String machineName = rs.getString("Machine_Name");
+                String panelBarCode = rs.getString("Panel_Bar_Code");
+                String valueOfTestedObjects = rs.getString("Nb_Of_Tested_Object");
+                long timeStamp = rs.getLong("Repair_Numeric_Date_Hour");
+                Date time = new Date(timeStamp * 1000);
+                String operator = rs.getString("Operator_Name");
+
+                panelsCodes.add(panelBarCode);
+                setData(productName, topology, model, partNumber, repairComment, machineName, panelBarCode, DATE_FORMAT.format(time), operator, valueOfTestedObjects);
+
+            }
+//            long end = System.currentTimeMillis() - start;
+//            System.out.println("Data list filled into the object: " + end + " ms");
+
+        } catch (SQLException ex){
+            alert = new CustomAlert("An Error Occurred!", "Error while getting answer from DB!", ex.toString(), Alert.AlertType.ERROR);
+        }
+
+    }
+
+    @Override
+    protected ObservableList<Data> call() throws Exception {
+        if(machineName != null) {
+            if (machineName.equals("All")) {
+                return getFullData(startTimeUnix, endTimeUnix);
+            } else {
+                return getDataByMachine(startTimeUnix, endTimeUnix, machineName);
+            }
+        }
+        return  null;
+    }
 }

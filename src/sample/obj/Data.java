@@ -10,8 +10,9 @@ public class Data {
     private String panelCode;
     private String date;
     private String operatorID;
+    private String numOfTestedComponents;
 
-    public Data (String productName,String topology, String model, String partNumber, String errorType, String machineName, String panelCode, String date, String operatorID){
+    public Data (String productName,String topology, String model, String partNumber, String errorType, String machineName, String panelCode, String date, String operatorID, String numOfTestedComponents){
         this.productName = productName;
         this.topology = topology;
         this.model = model;
@@ -21,6 +22,7 @@ public class Data {
         this.panelCode = panelCode;
         this.date = date;
         this.operatorID = operatorID;
+        this.numOfTestedComponents = numOfTestedComponents;
     }
 
     public String getProductName(){
@@ -93,5 +95,13 @@ public class Data {
 
     public void setOperatorID (String operatorID){
         this.operatorID = operatorID;
+    }
+
+    public String getNumOfTestedComponents (){
+        return numOfTestedComponents;
+    }
+
+    public void setNumOfTestedComponents (String numOfTestedComponents){
+        this.numOfTestedComponents = numOfTestedComponents;
     }
 }

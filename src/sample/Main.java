@@ -14,9 +14,9 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    public final static String VERSION = "4.1.1";
-    public final static String LAST_VERSION_DATE = "07.12.2018";
-    public static Stage primaryStage;
+    public final static String VERSION = "4.2.3";
+    public final static String LAST_VERSION_DATE = "14.11.2019";
+    private Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -36,6 +36,10 @@ public class Main extends Application {
         //primaryStage.setMinHeight(870);
         primaryStage.setResizable(false);
         primaryStage.show();
+    }
+
+    public Stage getPrimaryStage (){
+        return this.primaryStage;
     }
 
     public static void main(String[] args) {

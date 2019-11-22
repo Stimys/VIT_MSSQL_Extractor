@@ -1,25 +1,23 @@
 <?xml version = "1.0"?>
 <class>
 	<line id = "1">
-		<name>Siemens</name>
-		<ip>10.100.127.160\:1433</ip>
-		<dbname>Supervisor_2017_11_31</dbname>
-		<user>sa</user>
-		<password>vit</password>
-	</line>
-
-	<line id = "2">
 		<name>Fuji_Long</name>
 		<ip>10.100.127.160\:1433</ip>
 		<dbname>Supervisor_2017_07_18</dbname>
 		<user>sa</user>
 		<password>vit</password>
 	</line>
-
+	<line id = "2">
+		<name>Siemens</name>
+		<ip>10.100.127.160\:1433</ip>
+		<dbname>Supervisor_2017_11_31</dbname>
+		<user>sa</user>
+		<password>vit</password>
+	</line>
 	<line id = "3">
 		<name>5K_Lines</name>
 		<ip>10.100.127.150\:1433</ip>
-		<dbname>Supervisor_2017_11_23</dbname>
+		<dbname>Supervisor_2019_07_03</dbname>
 		<user>sa</user>
 		<password>vit</password>
 	</line>

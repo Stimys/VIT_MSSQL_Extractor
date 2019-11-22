@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="VIT_DataBaseExtractor_Project.jar" size="238343" download="eager" />
+    <jar href="VIT_DataBaseExtractor_Project.jar" size="242561" download="eager" />
     <jar href="sqljdbc4.jar" size="466359" download="eager" />
   </resources>
   <jfx:javafx-desc  width="1135" height="795" main-class="sample.Main"  name="VIT_DataBaseExtractor_Project" />

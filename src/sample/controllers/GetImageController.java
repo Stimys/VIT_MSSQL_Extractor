@@ -170,7 +170,7 @@ public class GetImageController{
                     getImages.setDefectType(cbDefectType.getValue());
                     getImages.start();
 
-                    getImages.join();
+                    //getImages.join();
 
                     lbStatus.setText("Copied images: " + getImages.getValueOfCopiedFiles());
                     alert.setTitle("Complete!");

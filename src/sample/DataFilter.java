@@ -35,11 +35,10 @@ public class DataFilter {
         if(searchValue == null || searchValue.isEmpty()){
             erroralert.setTitle("Error!");
             erroralert.setHeaderText(null);
-            erroralert.setContentText("Please enter the search text field!");
+            erroralert.setContentText("Please fill the search text field!");
             erroralert.showAndWait();
         }
         else{
-            //searchValue = searchValue.toLowerCase();
             filteredList.setPredicate((Predicate<? super Data>) data ->{
 
                 if(data.getDate().contains(searchValue)){

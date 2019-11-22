@@ -30,7 +30,7 @@ public class GetImages extends Thread {
     private final String AOI_5K_DIR = "Users\\Paulius\\Desktop\\IMAGES\\";
     //private final String AOI_DV2_DIR = "Users\\Paulius\\Desktop\\IMAGES\\";
     //private final String AOI_DV3_DIR = "Users\\Paulius\\Desktop\\IMAGES\\";
-    private final String AOI_1_REPAIR_DIR = "d\\Images\\";
+    //private final String AOI_1_REPAIR_DIR = "d\\Images\\";
     private final String AOI_3_REPAIR_DIR = "data (d)\\Images\\";
 
     private final String AOI_5K_FALSE_ALARM_FOLDER = "False_Alrm";
@@ -59,8 +59,6 @@ public class GetImages extends Thread {
     private Path destFile ;
 
     private Integer copiedFileCounter = 0;
-
-    //private BasicFileAttributes fileAttr;
 
     private String sourceDir;
 

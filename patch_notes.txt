@@ -1,0 +1,6 @@
+Version 4.2.3
+    * Structure optimization (Many classes were rebuild, application logic were separated to additional classes)
+    * Added feature to make request by one machine
+    * Fixed statistics calculation (Also, added warning values)
+    * Simplified time format in the main data table
+    * Added new additional thread for database request

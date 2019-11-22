@@ -121,9 +121,4 @@ public class LineXMLIni {
 
         return productLineList;
     }
-
-
-//    private void addToList(int id, String name, String ip, String dbName,String user, String password){
-//        productLineList.add(new ProductLine(id,name,ip,dbName,user,password));
-//    }
 }
